@@ -8,14 +8,15 @@ import FAQ from './components/FAQ';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
 
+// Permite que o TypeScript saiba que window.dataLayer existe
 declare global {
   interface Window {
     dataLayer: any[];
+    gtag?: (...args: any[]) => void;
   }
 }
 
 function App() {
-  // Coloque o useEffect aqui, dentro do componente
   useEffect(() => {
     // Cria o script do Google Ads
     const script = document.createElement("script");
@@ -23,12 +24,16 @@ function App() {
     script.src = "https://www.googletagmanager.com/gtag/js?id=AW-17613283259";
     document.head.appendChild(script);
 
-    // Inicializa o gtag
-    window.dataLayer = window.dataLayer || [];
-    function gtag(...args: any[]) { window.dataLayer.push(args); }
-    gtag('js', new Date());
-    gtag('config', 'AW-17613283259');
-  }, []); // o array vazio [] garante que rode só uma vez
+    // Inicializa o gtag quando o script carregar
+    script.onload = () => {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(...args: any[]) {
+        window.dataLayer.push(args);
+      };
+      window.gtag('js', new Date());
+      window.gtag('config', 'AW-17613283259');
+    };
+  }, []); // [] garante que rode só uma vez
 
   return (
     <div className="min-h-screen bg-white">
